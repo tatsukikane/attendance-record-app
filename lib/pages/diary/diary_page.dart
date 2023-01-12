@@ -1,16 +1,15 @@
-import 'package:attendance_record_app/pages/journals_page_controller.dart';
+import 'package:attendance_record_app/controllers/diary_page_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class JournalsPage extends ConsumerWidget {
-  const JournalsPage({Key? key}) : super(key: key);
+class DiaryPage extends ConsumerWidget {
+  const DiaryPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
-    final journalsController = ref.read(journalsNotifierProvider.notifier);
-    final journals = ref.watch(journalsNotifierProvider);
-    journalsController.refreshJournals();
+    final diaryController = ref.read(diaryPageNotifierProvider.notifier);
+    final diary = ref.watch(diaryPageNotifierProvider);
+    diaryController.refreshDiary();
 
     return Scaffold(
       appBar: AppBar(
@@ -21,25 +20,26 @@ class JournalsPage extends ConsumerWidget {
               child: CircularProgressIndicator(),
             )
           : ListView.builder(
-              itemCount: journals.length,
+              itemCount: diary.length,
               itemBuilder: (context, index) => Card(
                 color: Colors.orange[200],
                 margin: const EdgeInsets.all(15),
                 child: ListTile(
-                  title: Text(journals[index]['title']),
-                  subtitle: Text(journals[index]['description']),
+                  title: Text(diary[index].totalTime.toString()),
+                  subtitle: Text(diary[index].startedAt.day.toString()),
                   trailing: SizedBox(
                     width: 100,
                     child: Row(
                       children: [
                         IconButton(
-                          onPressed: () => journalsController.showForm(
-                              journals[index]['id'], context),
+                          // onPressed: () => journalsController.showForm(
+                          //     journals[index].id, context),
+                          onPressed: () {},
                           icon: const Icon(Icons.edit),
                         ),
                         IconButton(
-                            onPressed: () => journalsController
-                                .deleteItem(journals[index]['id'], context),
+                            onPressed: () => diaryController.deleteItem(
+                                diary[index].id, context),
                             icon: const Icon(Icons.delete))
                       ],
                     ),
@@ -47,9 +47,6 @@ class JournalsPage extends ConsumerWidget {
                 ),
               ),
             ),
-      floatingActionButton: FloatingActionButton(
-          child: const Icon(Icons.add),
-          onPressed: () => journalsController.showForm(null, context)),
     );
   }
 }

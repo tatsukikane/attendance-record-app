@@ -1,13 +1,15 @@
+import 'package:attendance_record_app/models/attendace_recoard.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 
+//todo 時間用にカスタマイズする
 class SQLHelper {
   static Future<void> createTables(sql.Database database) async {
     await database.execute("""CREATE TABLE items(
       id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-      title TEXT,
-      description TEXT,
-      createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      totalTime INTEGER,
+      startedAt TIMESTAMP,
+      endedAt TIMESTAMP
     )
 """);
   }
@@ -22,17 +24,33 @@ class SQLHelper {
 
   static Future<int> createItem(String title, String? description) async {
     final db = await SQLHelper.db();
+    final List<AttendaceRecoard> existingDataCount = await getItems();
 
-    final data = {'title': title, 'description': description};
-    final id = await db.insert('items', data,
+    final fetchedRecord = {
+      'id': existingDataCount.length + 1,
+      'totalTime': title,
+      'startedAt': DateTime.now().toString()
+    };
+
+    final id = await db.insert('items', fetchedRecord,
         //コンフリクト発生時の処理オプション
         conflictAlgorithm: sql.ConflictAlgorithm.replace);
     return id;
   }
 
-  static Future<List<Map<String, dynamic>>> getItems() async {
+  static Future<List<AttendaceRecoard>> getItems() async {
     final db = await SQLHelper.db();
-    return db.query('items', orderBy: "id");
+    final List<Map<String, dynamic>> fetchedRecord =
+        await db.query('items', orderBy: "id");
+
+    return List.generate(fetchedRecord.length, (i) {
+      return AttendaceRecoard(
+        id: fetchedRecord[i]['id'],
+        totalTime: fetchedRecord[i]['totalTime'],
+        startedAt: DateTime.parse(fetchedRecord[i]['startedAt']),
+        endedAt: DateTime.parse(fetchedRecord[i]['endedAt']),
+      );
+    });
   }
 
   static Future<List<Map<String, dynamic>>> getItem(int id) async {
@@ -44,19 +62,19 @@ class SQLHelper {
       int id, String title, String? description) async {
     final db = await SQLHelper.db();
 
-    final data = {
-      'title': title,
-      'description': description,
-      'createdAt': DateTime.now().toString()
+    final fetchedRecord = {
+      'totalTime': title,
+      'endedAt': DateTime.now().toString(),
     };
 
-    final result =
-        await db.update('items', data, where: "id = ?", whereArgs: [id]);
+    final result = await db
+        .update('items', fetchedRecord, where: "id = ?", whereArgs: [id]);
     return result;
   }
 
   static Future<void> deleteItem(int id) async {
     final db = await SQLHelper.db();
+
     try {
       await db.delete("items", where: "id = ?", whereArgs: [id]);
     } catch (err) {
