@@ -7,9 +7,6 @@ class CountPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final journalsController = ref.read(journalsNotifierProvider.notifier);
-    // final journals = ref.watch(journalsNotifierProvider);
-    // journalsController.refreshJournals();
     final countPageController = ref.read(countPageControllerProvider);
 
     return Scaffold(
@@ -24,9 +21,7 @@ class CountPage extends ConsumerWidget {
                 alignment: Alignment.center,
                 child: Text(
                   ref.watch(timerDisplayProvider),
-                  style: const TextStyle(
-                    fontSize: 40
-                  ),
+                  style: const TextStyle(fontSize: 40),
                 ),
               ),
               const SizedBox(height: 30),
@@ -37,37 +32,35 @@ class CountPage extends ConsumerWidget {
                     onPressed: () {
                       countPageController.startStopWatch();
                     },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.black,
+                    ),
                     child: const Text(
                       "Start",
                       style: TextStyle(
                         color: Colors.white,
                       ),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black, //押したときの色！！
-                    ),
                   ),
                   ElevatedButton(
                     onPressed: () {
                       countPageController.stopStopWatch();
-
                     },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.black,
+                    ),
                     child: const Text(
                       "stop",
                       style: TextStyle(
                         color: Colors.white,
                       ),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black, //押したときの色！！
-                    ),
                   ),
                 ],
               ),
               ElevatedButton(
                 onPressed: () {
-                      countPageController.resetStopWatch();
-
+                  countPageController.resetStopWatch();
                 },
                 child: const Text(
                   "reset",
