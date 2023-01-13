@@ -14,6 +14,7 @@ class TabPage extends ConsumerWidget {
     return Scaffold(
       body: TabPageController.pages[currentIndex],
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.black,
         currentIndex: currentIndex,
         onTap: tabPageController.onItemTapped,
         items: <BottomNavigationBarItem>[
@@ -22,7 +23,7 @@ class TabPage extends ConsumerWidget {
                 "images/hourglass.svg",
                 width: 24,
                 height: 24,
-                color: currentIndex == 0 ? Colors.blue : null,
+                color: currentIndex == 0 ? Colors.green : null,
               ),
               label: ''),
           BottomNavigationBarItem(
@@ -30,7 +31,7 @@ class TabPage extends ConsumerWidget {
                 "images/calendar.svg",
                 width: 32,
                 height: 32,
-                color: currentIndex == 1 ? Colors.blue : null,
+                color: currentIndex == 1 ? Colors.green : null,
               ),
               label: ''),
         ],

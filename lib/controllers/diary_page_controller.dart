@@ -22,6 +22,63 @@ class DiaryPageNotifier extends StateNotifier<List<AttendaceRecoard>> {
     state = data;
   }
 
+  final TextEditingController _titleController = TextEditingController();
+
+  void showForm(int? id, BuildContext context) async {
+    if (id != null) {
+      final selectedDiary = state.firstWhere((element) => element.id == id);
+      _titleController.text = selectedDiary.totalTime.toString();
+    }
+
+    showModalBottomSheet(
+      context: context,
+      elevation: 5,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
+      //TODO:container以下コンポーネント化
+      builder: (_) => Container(
+        padding: const EdgeInsets.only(
+            top: 16,
+            left: 16,
+            right: 16,
+            // bottom: MediaQuery.of(context).viewInsets.bottom + 120),
+            bottom: 336),
+        child: Row(
+          children: [
+            Flexible(
+              child: TextField(
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                controller: _titleController,
+                decoration: const InputDecoration(hintText: '分'),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (id != null) {
+                  await _updateItem(id);
+                }
+
+                _titleController.text = "";
+
+                if (!mounted) return;
+                Navigator.of(context).pop;
+              },
+              child: const Text('Update'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _updateItem(int id) async {
+    await SQLHelper.updateItem(id, _titleController.text);
+    refreshDiary();
+  }
+
   void deleteItem(int id, BuildContext context) async {
     await SQLHelper.deleteItem(id);
     //TODO: POPUPに変更
@@ -31,4 +88,3 @@ class DiaryPageNotifier extends StateNotifier<List<AttendaceRecoard>> {
     refreshDiary();
   }
 }
-

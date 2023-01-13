@@ -1,6 +1,9 @@
+import 'package:attendance_record_app/components/atom/atom/button.dart';
 import 'package:attendance_record_app/controllers/count_page_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 
 class CountPage extends ConsumerWidget {
   const CountPage({Key? key}) : super(key: key);
@@ -8,72 +11,85 @@ class CountPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final countPageController = ref.read(countPageControllerProvider);
-
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("countPage"),
-        ),
-        body: Container(
-          child: Column(
-            children: [
-              const SizedBox(height: 100),
-              Container(
-                alignment: Alignment.center,
-                child: Text(
-                  ref.watch(timerDisplayProvider),
-                  style: const TextStyle(fontSize: 40),
-                ),
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            Column(
+              children: [
+                Lottie.asset('images/space-ride.json'),
+              ],
+            ),
+            SizedBox(
+              child: Column(
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
+                  const SizedBox(height: 280),
+                  Container(
+                    alignment: Alignment.center,
+                    child: Text(
+                      ref.watch(timerDisplayProvider),
+                      style: GoogleFonts.dotGothic16(
+                          fontSize: 64, color: Colors.green),
+                    ),
+                  ),
+                  const SizedBox(height: 80),
+                  Button(
+                    title: "業務開始",
+                    isActive: ref.read(isStartProvider),
+                    onTap: () {
                       countPageController.startStopWatch();
                     },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                    ),
-                    child: const Text(
-                      "Start",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
+                    height: 48,
+                    width: 160,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      countPageController.stopStopWatch();
+                  const SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Button(
+                        title: "ReStart",
+                        isActive: ref.read(isReStartProvider),
+                        onTap: () {
+                          //関数変更
+                          countPageController.reStartStopWatch();
+                        },
+                        height: 48,
+                        width: 104,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                      ),
+                      Button(
+                        title: "Stop",
+                        isActive: ref.read(isStopProvider),
+                        onTap: () {
+                          countPageController.stopStopWatch();
+                        },
+                        height: 48,
+                        width: 104,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                  Button(
+                    title: "業務終了",
+                    isActive: ref.read(isResetProvider),
+                    onTap: () {
+                      countPageController.resetStopWatch();
                     },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                    ),
-                    child: const Text(
-                      "stop",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
+                    height: 48,
+                    width: 160,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
+                  const Expanded(child: SizedBox()),
                 ],
               ),
-              ElevatedButton(
-                onPressed: () {
-                  countPageController.resetStopWatch();
-                },
-                child: const Text(
-                  "reset",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black, //押したときの色！！
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ));
   }
 }

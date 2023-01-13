@@ -9,9 +9,8 @@ class SQLHelper {
       id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       totalTime INTEGER,
       startedAt TIMESTAMP,
-      endedAt TIMESTAMP
-    )
-""");
+      endedAt TIMESTAMP)
+    """);
   }
 
   //openDatabaseの第一引数がDB作成場所のpathになるので、そこは引数で入れるようにする
@@ -58,12 +57,11 @@ class SQLHelper {
     return db.query('items', where: "id = ?", whereArgs: [id], limit: 1);
   }
 
-  static Future<int> updateItem(
-      int id, String title, String? description) async {
+  static Future<int> updateItem(int id, String totalTime) async {
     final db = await SQLHelper.db();
 
     final fetchedRecord = {
-      'totalTime': title,
+      'totalTime': totalTime,
       'endedAt': DateTime.now().toString(),
     };
 
