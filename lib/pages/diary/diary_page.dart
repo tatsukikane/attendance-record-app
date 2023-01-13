@@ -10,96 +10,90 @@ class DiaryPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final diaryController = ref.read(diaryPageNotifierProvider.notifier);
     final diary = ref.watch(diaryPageNotifierProvider);
-    diaryController.refreshDiary();
+    //DiaryPage全体がリビルドされ続けていてrefreshDiaryが走り続けるため応急処置
+    if (ref.watch(isLoadingProvider)) {
+      diaryController.refreshDiary();
+    }
 
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text("Diary"),
+        title: ref.watch(isLoadingProvider)
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : Text('${diary[0].startedAt.year}年${diary[0].startedAt.month}月'),
       ),
       body: Column(
         children: [
-          Container(
-            child: TextWidget(text: "月の合計時間や、月の切り替えを表示、年月も表示",),
+          SizedBox(
+            child: TextWidget(
+              text: ref.watch(monthlyTotalTimeProvider) < 60
+                  ? 'トータル：${ref.watch(monthlyTotalTimeProvider)}分'
+                  : 'トータル：${ref.watch(monthlyTotalTimeProvider) ~/ 60}時間${ref.watch(monthlyTotalTimeProvider) % 60}分',
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(
+            height: 24,
           ),
           ref.watch(isLoadingProvider)
               ? const Center(
                   child: CircularProgressIndicator(),
                 )
               : Expanded(
-                child: ListView.builder(
-                    itemCount: diary.length,
-                    itemBuilder: (context, index) => Container(
-                          decoration: BoxDecoration(
-            border: const Border(
-              top: const BorderSide(
-                color: Colors.green,
-                width: 2,
-              ),
-            ),
-                          ),
-                          height: 56,
-                          child: Row(
-                            children: [
-                              TextWidget(
-                                text: '${diary[index].startedAt.day.toString()}日',
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                  child: ListView.builder(
+                      itemCount: diary.length,
+                      itemBuilder: (context, index) => Container(
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                  color: Colors.green,
+                                  width: 2,
+                                ),
                               ),
-                              const Expanded(child: SizedBox()),
-                              TextWidget(
-                                text: diary[index].totalTime < 60 
-                                ? '${diary[index].totalTime}分'
-                                : '${diary[index].totalTime ~/ 60}時間${diary[index].totalTime % 60}分',
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              const Expanded(child: SizedBox()),
-                              IconButton(
-                                onPressed: () => diaryController.showForm(
-                                    diary[index].id, context),
-                                icon: const Icon(Icons.edit, color: Colors.green,),
-                              ),
-                              IconButton(
-                                  onPressed: () => diaryController.deleteItem(
+                            ),
+                            height: 56,
+                            child: Row(
+                              children: [
+                                TextWidget(
+                                  text:
+                                      '${diary[index].startedAt.day.toString()}日',
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                const Expanded(child: SizedBox()),
+                                TextWidget(
+                                  text: diary[index].totalTime < 60
+                                      ? '${diary[index].totalTime}分'
+                                      : '${diary[index].totalTime ~/ 60}時間${diary[index].totalTime % 60}分',
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                const Expanded(child: SizedBox()),
+                                IconButton(
+                                  onPressed: () => diaryController.showForm(
                                       diary[index].id, context),
-                                  icon: const Icon(Icons.delete, color: Colors.red,))
-                            ],
-                          ),
-                        )),
-              ),
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                                IconButton(
+                                    onPressed: () => diaryController.deleteItem(
+                                        diary[index].id, context),
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ))
+                              ],
+                            ),
+                          )),
+                ),
         ],
       ),
-
-      // : ListView.builder(
-      //     itemCount: diary.length,
-      //     itemBuilder: (context, index) => Card(
-      //       color: Colors.orange[200],
-      //       margin: const EdgeInsets.all(15),
-      //       child: ListTile(
-      //         title: Text(diary[index].totalTime.toString()),
-      //         subtitle: Text(diary[index].startedAt.day.toString()),
-      //         trailing: SizedBox(
-      //           width: 100,
-      //           child: Row(
-      //             children: [
-      //               IconButton(
-      //                 // onPressed: () => journalsController.showForm(
-      //                 //     journals[index].id, context),
-      //                 onPressed: () {},
-      //                 icon: const Icon(Icons.edit),
-      //               ),
-      //               IconButton(
-      //                   onPressed: () => diaryController.deleteItem(
-      //                       diary[index].id, context),
-      //                   icon: const Icon(Icons.delete))
-      //             ],
-      //           ),
-      //         ),
-      //       ),
-      //     ),
-      //   ),
     );
   }
 }

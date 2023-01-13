@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final isLoadingProvider = StateProvider<bool>((ref) => true);
+final monthlyTotalTimeProvider = StateProvider<int>((ref) => 0);
 
 //Providerでラップすることで、変更を監視する
 final diaryPageNotifierProvider =
@@ -14,11 +15,14 @@ final diaryPageNotifierProvider =
 //監視対象の変数とそれに対する処理を書くところ
 class DiaryPageNotifier extends StateNotifier<List<AttendaceRecoard>> {
   DiaryPageNotifier(this.ref) : super([]);
+
   final Ref ref;
 
   void refreshDiary() async {
+    //ずっと実行されてる
     final data = await SQLHelper.getItems();
     ref.watch(isLoadingProvider.notifier).state = false;
+    getMonthlyTotalTime(data);
     state = data;
   }
 
@@ -86,5 +90,12 @@ class DiaryPageNotifier extends StateNotifier<List<AttendaceRecoard>> {
       content: Text("Successfully deleted a journal!"),
     ));
     refreshDiary();
+  }
+
+  getMonthlyTotalTime(List<AttendaceRecoard> diary) {
+    ref.watch(monthlyTotalTimeProvider.notifier).state = 0;
+    for (int i = 0; i < diary.length; i++) {
+      ref.read(monthlyTotalTimeProvider.notifier).state += diary[i].totalTime;
+    }
   }
 }

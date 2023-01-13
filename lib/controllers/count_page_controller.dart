@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:attendance_record_app/controllers/diary_page_controller.dart';
 import 'package:attendance_record_app/service/sql_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -76,6 +77,7 @@ class CountPageController {
     int totalTimeM = (totalTimeS / 60).round();
 
     await SQLHelper.updateItem(postedId, totalTimeM.toString());
+    ref.read(diaryPageNotifierProvider.notifier).refreshDiary();
     stopWatch.reset();
     ref.read(timerDisplayProvider.notifier).state = '00:00:00';
   }

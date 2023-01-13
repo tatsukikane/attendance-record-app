@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 
+//TODO: ボタンがアクティブで無い時に押せないようにする
 class CountPage extends ConsumerWidget {
   const CountPage({Key? key}) : super(key: key);
 
