@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final isLoadingProvider = StateProvider<bool>((ref) => true);
 final monthlyTotalTimeProvider = StateProvider<int>((ref) => 0);
+final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
 //Providerでラップすることで、変更を監視する
 final diaryPageNotifierProvider =
@@ -18,16 +19,20 @@ class DiaryPageNotifier extends StateNotifier<List<AttendaceRecoard>> {
 
   final Ref ref;
 
-  void refreshDiary() async {
+  void refreshDiary([DateTime? selectedDate]) async {
     //ずっと実行されてる
-    final data = await SQLHelper.getItems();
+    var date = selectedDate == null
+        ? ref.watch(diaryPageControllerProvider).getNowDateForQuery()
+        : ref
+            .watch(diaryPageControllerProvider)
+            .getSelectedDateForQuery(selectedDate);
+    final data = await SQLHelper.getItemsSortedByDate(date[0], date[1]);
     ref.watch(isLoadingProvider.notifier).state = false;
     getMonthlyTotalTime(data);
     state = data;
   }
 
   final TextEditingController _titleController = TextEditingController();
-
   void showForm(int? id, BuildContext context) async {
     if (id != null) {
       final selectedDiary = state.firstWhere((element) => element.id == id);
@@ -80,7 +85,7 @@ class DiaryPageNotifier extends StateNotifier<List<AttendaceRecoard>> {
 
   Future<void> _updateItem(int id) async {
     await SQLHelper.updateItem(id, _titleController.text);
-    refreshDiary();
+    refreshDiary(ref.watch(selectedDateProvider));
   }
 
   void deleteItem(int id, BuildContext context) async {
@@ -89,7 +94,7 @@ class DiaryPageNotifier extends StateNotifier<List<AttendaceRecoard>> {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text("Successfully deleted a journal!"),
     ));
-    refreshDiary();
+    refreshDiary(ref.watch(selectedDateProvider));
   }
 
   getMonthlyTotalTime(List<AttendaceRecoard> diary) {
@@ -97,5 +102,41 @@ class DiaryPageNotifier extends StateNotifier<List<AttendaceRecoard>> {
     for (int i = 0; i < diary.length; i++) {
       ref.read(monthlyTotalTimeProvider.notifier).state += diary[i].totalTime;
     }
+  }
+
+  selectDateForGetDiary(List<AttendaceRecoard> diary) {
+    ref.watch(monthlyTotalTimeProvider.notifier).state = 0;
+    for (int i = 0; i < diary.length; i++) {
+      ref.read(monthlyTotalTimeProvider.notifier).state += diary[i].totalTime;
+    }
+  }
+}
+
+final diaryPageControllerProvider = Provider((ref) {
+  return DiaryPageController(ref: ref);
+});
+
+class DiaryPageController {
+  final ProviderRef ref;
+  DiaryPageController({required this.ref});
+
+  List<String> dateConverterToYearAndMonth(DateTime dateTime) {
+    String now = dateTime.toString();
+    String nowDate = now.split(' ')[0];
+    return nowDate.split("-");
+  }
+
+  List<String> getNowDateForQuery() {
+    List nowYearMonth = dateConverterToYearAndMonth(DateTime.now());
+    String startDateTime = '${nowYearMonth[0]}-${nowYearMonth[1]}-01 00:00:00';
+    String endDateTime = '${nowYearMonth[0]}-${nowYearMonth[1]}-31 23:59:59';
+    return [startDateTime, endDateTime];
+  }
+
+  List<String> getSelectedDateForQuery(DateTime selectedDate) {
+    List nowYearMonth = dateConverterToYearAndMonth(selectedDate);
+    String startDateTime = '${nowYearMonth[0]}-${nowYearMonth[1]}-01 00:00:00';
+    String endDateTime = '${nowYearMonth[0]}-${nowYearMonth[1]}-31 23:59:59';
+    return [startDateTime, endDateTime];
   }
 }

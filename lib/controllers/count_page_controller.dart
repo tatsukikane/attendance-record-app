@@ -44,7 +44,7 @@ class CountPageController {
     ref.read(isResetProvider.notifier).state = true;
     ref.read(isStartProvider.notifier).state = false;
     postedId = await SQLHelper.createItem(
-        stopWatch.elapsedMilliseconds.toString(), "");
+        stopWatch.elapsedMilliseconds.toString());
     stopWatch.start();
     keepRunning();
   }

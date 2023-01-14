@@ -1,6 +1,8 @@
 import 'package:attendance_record_app/components/atom/atom/text_widget.dart';
 import 'package:attendance_record_app/controllers/diary_page_controller.dart';
+import 'package:attendance_record_app/service/date_picker_custom_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class DiaryPage extends ConsumerWidget {
@@ -23,7 +25,31 @@ class DiaryPage extends ConsumerWidget {
             ? const Center(
                 child: CircularProgressIndicator(),
               )
-            : Text('${diary[0].startedAt.year}年${diary[0].startedAt.month}月'),
+            : Text(
+                '${ref.watch(selectedDateProvider).year}年${ref.watch(selectedDateProvider).month}月'),
+        actions: <Widget>[
+          IconButton(
+            onPressed: () async {
+              await DatePicker.showPicker(context, showTitleActions: true,
+                pickerModel: YearMonthModel(
+                    currentTime: DateTime.now(),
+                    minTime: DateTime(2022, 1, 1),
+                    maxTime: DateTime.now(),
+                    locale: LocaleType.jp),
+                locale: LocaleType.en,
+                onConfirm: (date) {
+                  ref.read(selectedDateProvider.notifier).state = date;
+                  diaryController.refreshDiary(date);
+                },
+              );
+            },
+            icon: const Icon(
+              Icons.calendar_month,
+              color: Colors.green,
+            ),
+            splashColor: Colors.black,
+          ),
+        ],
       ),
       body: Column(
         children: [
