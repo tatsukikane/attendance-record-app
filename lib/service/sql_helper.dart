@@ -2,7 +2,6 @@ import 'package:attendance_record_app/models/attendace_recoard.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart' as sql;
 
-//todo 時間用にカスタマイズする
 class SQLHelper {
   static Future<void> createTables(sql.Database database) async {
     await database.execute("""CREATE TABLE items(
@@ -21,14 +20,14 @@ class SQLHelper {
     });
   }
 
-  static Future<int> createItem(String title, String? description) async {
+  static Future<int> createItem(String title) async {
     final db = await SQLHelper.db();
-    final List<AttendaceRecoard> existingDataCount = await getItems();
+    // final List<AttendaceRecoard> existingDataCount = await getAllItems();
 
     final fetchedRecord = {
-      'id': existingDataCount.length + 1,
+      'id': DateTime.now().millisecondsSinceEpoch,
       'totalTime': title,
-      'startedAt': DateTime.now().toString()
+      'startedAt': DateTime.now().toString(),
     };
 
     final id = await db.insert('items', fetchedRecord,
@@ -37,7 +36,7 @@ class SQLHelper {
     return id;
   }
 
-  static Future<List<AttendaceRecoard>> getItems() async {
+  static Future<List<AttendaceRecoard>> getAllItems() async {
     final db = await SQLHelper.db();
     final List<Map<String, dynamic>> fetchedRecord =
         await db.query('items', orderBy: "id");
@@ -52,9 +51,27 @@ class SQLHelper {
     });
   }
 
+  //TODO: 引数追加
+  static Future<List<AttendaceRecoard>> getItemsSortedByDate(String startDate, String endDate) async {
+    final db = await SQLHelper.db();
+    final List<Map<String, dynamic>> fetchedRecord =
+        await db.query('items', where: "startedAt BETWEEN ? AND ?", whereArgs: [startDate, endDate]);
+
+
+    return List.generate(fetchedRecord.length, (i) {
+      return AttendaceRecoard(
+        id: fetchedRecord[i]['id'],
+        totalTime: fetchedRecord[i]['totalTime'],
+        startedAt: DateTime.parse(fetchedRecord[i]['startedAt']),
+        endedAt: DateTime.parse(fetchedRecord[i]['endedAt']),
+      );
+    });
+  }
+
   static Future<List<Map<String, dynamic>>> getItem(int id) async {
     final db = await SQLHelper.db();
     return db.query('items', where: "id = ?", whereArgs: [id], limit: 1);
+
   }
 
   static Future<int> updateItem(int id, String totalTime) async {
